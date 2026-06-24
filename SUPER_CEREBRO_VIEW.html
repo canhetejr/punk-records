@@ -5,49 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Super Cérebro • Graph View</title>
   <style>
-    :root{
-      --bg:#0b0b0c; --panel:rgba(16,16,18,.74); --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.18);
-      --text:#f4f4f4; --muted:#9a9a9a; --soft:#707070; --root:#ffffff; --group:#d4d4d4; --item:#ececec;
-      --glow:rgba(255,255,255,.10);
-    }
+    :root{--bg:#0b0b0c;--panel:rgba(16,16,18,.66);--line:rgba(255,255,255,.10);--line2:rgba(255,255,255,.18);--text:#f4f4f4;--muted:#9c9c9c;--soft:#707070;--root:#ffffff;--group:#d6d6d6;--item:#efefef;}
     *{box-sizing:border-box}
-    html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(circle at 50% 20%, #141416 0%, #0b0b0c 42%, #050506 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
+    html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(circle at 50% 20%, #151516 0%, #0b0b0c 42%, #050506 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
     .app{position:relative;width:100vw;height:100vh}
-    .hud{position:absolute;left:16px;top:14px;z-index:5;pointer-events:none;display:flex;flex-direction:column;gap:10px;max-width:min(820px,calc(100vw - 32px))}
-    .brand{pointer-events:auto;padding:0}
-    h1{margin:0;font-size:clamp(28px,4vw,44px);line-height:.92;letter-spacing:-.06em}
-    .sub{margin:8px 0 0;max-width:72ch;color:var(--muted);font-size:13px;line-height:1.5}
+    .hud{position:absolute;left:14px;top:12px;z-index:5;pointer-events:none;display:flex;flex-direction:column;gap:10px;max-width:min(860px,calc(100vw - 28px))}
+    .brand{pointer-events:auto}
+    h1{margin:0;font-size:clamp(26px,3.8vw,40px);line-height:.92;letter-spacing:-.06em;font-weight:900}
+    .sub{margin:8px 0 0;max-width:74ch;color:var(--muted);font-size:13px;line-height:1.45}
     .tools{pointer-events:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .input,.select,.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:14px;padding:12px 14px;font:inherit;outline:none;backdrop-filter:blur(10px)}
-    .input{min-width:min(320px,46vw);flex:1}
+    .input,.select,.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:14px;padding:11px 14px;font:inherit;outline:none;backdrop-filter:blur(10px)}
+    .input{min-width:min(340px,46vw);flex:1}
     .select{min-width:160px}
     .btn{cursor:pointer;background:#f2f2f2;color:#0a0a0a;font-weight:800}
     .legend{pointer-events:none;display:flex;flex-wrap:wrap;gap:8px}
-    .pill{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(10,10,10,.58);font-size:12px;color:var(--muted)}
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(10,10,10,.52);font-size:12px;color:var(--muted)}
     .pill b{color:var(--text)}
     .graphWrap{position:absolute;inset:0}
     canvas{width:100%;height:100%;display:block;cursor:grab}
     canvas:active{cursor:grabbing}
-    .info{position:absolute;right:16px;top:16px;z-index:5;width:min(360px,calc(100vw - 32px));padding:14px 14px 13px;border:1px solid var(--line);border-radius:16px;background:rgba(12,12,12,.80);backdrop-filter:blur(12px);box-shadow:0 18px 60px rgba(0,0,0,.35)}
+    .info{position:absolute;right:14px;top:12px;z-index:5;width:min(360px,calc(100vw - 28px));padding:12px 14px 13px;border:1px solid var(--line);border-radius:16px;background:rgba(12,12,12,.74);backdrop-filter:blur(12px);box-shadow:0 18px 60px rgba(0,0,0,.32)}
     .info .k{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
     .info .v{font-size:14px;line-height:1.45;color:var(--text)}
     .info .s{color:var(--muted);margin-top:6px;font-size:12px;line-height:1.45}
-    .status{position:absolute;left:16px;bottom:14px;z-index:5;color:var(--muted);font-size:12px;pointer-events:none}
-    .tooltip{position:absolute;z-index:6;pointer-events:none;max-width:280px;padding:10px 12px;border-radius:14px;border:1px solid var(--line2);background:rgba(8,8,8,.86);backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.28);opacity:0;transform:translate(0,8px);transition:opacity .12s ease, transform .12s ease}
+    .status{position:absolute;left:14px;bottom:12px;z-index:5;color:var(--muted);font-size:12px;pointer-events:none}
+    .tooltip{position:absolute;z-index:6;pointer-events:none;max-width:290px;padding:10px 12px;border-radius:14px;border:1px solid var(--line2);background:rgba(8,8,8,.88);backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.28);opacity:0;transform:translate(0,8px);transition:opacity .12s ease, transform .12s ease}
     .tooltip.show{opacity:1;transform:translate(0,0)}
     .tooltip .t{font-weight:800;margin-bottom:4px}
     .tooltip .m{font-size:12px;color:var(--muted);line-height:1.4}
-    @media (max-width: 800px){
-      html,body{overflow:auto}
-      .app{height:auto;min-height:100vh}
-      .graphWrap{position:relative;height:calc(100vh - 260px);min-height:500px}
-      canvas{height:100%}
-      .hud{right:16px;max-width:none}
-      .input{min-width:0;width:100%}
-      .select{min-width:0;flex:1}
-      .info{position:relative;right:auto;top:auto;margin:0 16px 12px 16px;width:auto}
-      .status{position:relative;left:auto;bottom:auto;margin:0 16px 16px 16px}
-    }
+    @media (max-width: 800px){html,body{overflow:auto}.app{height:auto;min-height:100vh}.graphWrap{position:relative;height:calc(100vh - 250px);min-height:500px}.hud{right:14px;max-width:none}.input{min-width:0;width:100%}.select{min-width:0;flex:1}.info{position:relative;right:auto;top:auto;margin:0 14px 12px 14px;width:auto}.status{position:relative;left:auto;bottom:auto;margin:0 14px 16px 14px}}
   </style>
 </head>
 <body>
@@ -55,7 +41,7 @@
   <div class="hud">
     <div class="brand">
       <h1>Super Cérebro • Graph View</h1>
-      <p class="sub">Estilo Obsidian: malha escura, nós flutuando, arestas finas e foco por hover/clique. Sem tabela. Sem painéis grandes. Só a rede.</p>
+      <p class="sub">Rede escura estilo Obsidian: pouco texto, mais pontos, links finos e foco por hover/clique. A malha começa densa o bastante para parecer graph view de verdade.</p>
     </div>
     <div class="tools">
       <input id="q" class="input" type="search" placeholder="Buscar nó, caminho ou resumo…" />
@@ -71,17 +57,16 @@
       <div class="pill"><b>Branco</b> foco</div>
       <div class="pill"><b>Cinza</b> grupo</div>
       <div class="pill"><b>Claro</b> item</div>
-      <div class="pill"><b>Arraste</b> mover nós</div>
+      <div class="pill"><b>Arraste</b> mover</div>
+      <div class="pill"><b>Scroll</b> zoom</div>
     </div>
   </div>
 
-  <div class="graphWrap">
-    <canvas id="c"></canvas>
-  </div>
+  <div class="graphWrap"><canvas id="c"></canvas></div>
 
   <div class="info" id="info">
     <div class="k" id="infok">Visão geral</div>
-    <div class="v" id="infov">Passe o mouse ou clique em um nó. A rede começa densa o suficiente para parecer graph view, mas ainda legível.</div>
+    <div class="v" id="infov">Passe o mouse ou clique em um nó.</div>
     <div class="s" id="infos">Dica: a busca reduz a malha e destaca os nós conectados.</div>
   </div>
 
@@ -103,6 +88,8 @@
         { id: 'index', label: 'INDEX.md', path: '~/.ai-brain/INDEX.md', summary: 'Mapa principal do conteúdo indexado.' },
         { id: 'config', label: 'brain_config.yaml', path: '~/.ai-brain/brain_config.yaml', summary: 'Configurações e identidade do cérebro.' },
         { id: 'super', label: 'SUPER_CEREBRO.md', path: '~/.ai-brain/SUPER_CEREBRO.md', summary: 'Documento central do cérebro local.' },
+        { id: 'cleanup', label: 'CLEANUP_REPORT.md', path: '~/.ai-brain/CLEANUP_REPORT.md', summary: 'Relatório de limpeza e reorganização.' },
+        { id: 'details', label: 'SUPER_CEREBRO_DETALHES.md', path: '~/.ai-brain/SUPER_CEREBRO_DETALHES.md', summary: 'Saída detalhada do cérebro local.' },
       ],
       hermes: [
         { id: 'agent', label: 'Hermes Agent', path: '~/.hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md', summary: 'Skill base para operar Hermes.' },
@@ -110,9 +97,15 @@
         { id: 'know', label: 'Knowledge Work', path: '~/.hermes/skills/productivity/knowledge-work-automation/SKILL.md', summary: 'Automação de trabalho de conhecimento.' },
         { id: 'docker', label: 'Docker Apps', path: '~/.hermes/skills/devops/docker-compose-self-hosted-apps/SKILL.md', summary: 'Deploy e verificação de apps self-hosted.' },
         { id: 'vis', label: 'Visual Artifact', path: '~/.hermes/skills/creative/visual-artifact-studio/SKILL.md', summary: 'Artefatos visuais e HTML polido.' },
+        { id: 'plan', label: 'Plan', path: '~/.hermes/skills/software-development/plan/SKILL.md', summary: 'Planejamento de implementação.' },
+        { id: 'debug', label: 'Systematic Debugging', path: '~/.hermes/skills/software-development/systematic-debugging/SKILL.md', summary: 'Debug estruturado em fases.' },
+        { id: 'tdd', label: 'TDD', path: '~/.hermes/skills/software-development/test-driven-development/SKILL.md', summary: 'Fluxo test-first.' },
+        { id: 'review', label: 'Requesting Code Review', path: '~/.hermes/skills/software-development/requesting-code-review/SKILL.md', summary: 'Revisão pré-merge.' },
+        { id: 'webhook', label: 'Webhook Subscriptions', path: '~/.hermes/skills/devops/webhook-subscriptions/SKILL.md', summary: 'Agentes por evento.' },
       ],
       claude: [
         { id: 'settings', label: 'settings.json', path: '~/.claude/settings.json', summary: 'Configuração local do Claude.' },
+        { id: 'auth', label: 'Claude Auth', path: 'claude auth status', summary: 'Estado de autenticação do Claude CLI.' },
       ],
     }
   };
@@ -138,7 +131,6 @@
   let pan = { x: 0, y: 0 };
   let zoom = 1;
   let pointer = { x: 0, y: 0 };
-  let running = true;
 
   function resize() {
     DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
@@ -155,75 +147,55 @@
     const scopeVal = scope.value;
     const qv = norm(q.value.trim());
     const keep = [];
+    const map = new Map();
 
-    const root = {
-      id: DATA.root.id,
-      label: DATA.root.label,
-      type: 'root',
-      group: 'root',
-      summary: DATA.root.summary,
-      x: 0, y: 0, vx: 0, vy: 0, fx: null, fy: null, r: 28
-    };
-    keep.push(root);
+    const root = { id: DATA.root.id, label: DATA.root.label, type: 'root', group: 'root', summary: DATA.root.summary, x: 0, y: 0, vx: 0, vy: 0, fx: null, fy: null, r: 28 };
+    keep.push(root); map.set(root.id, root);
 
     const groupNodes = [];
     for (const g of DATA.groups) {
       if (scopeVal !== 'all' && scopeVal !== g.group) continue;
-      const items = DATA.items[g.group] || [];
-      const filteredItems = items.filter(item => {
+      const filteredItems = DATA.items[g.group].filter(item => {
         const hay = norm(`${g.label} ${item.label} ${item.path} ${item.summary}`);
         return !qv || hay.includes(qv);
       });
       if (!filteredItems.length && qv) continue;
-      const gn = {
-        id: g.id, label: g.label, type: 'group', group: g.group, summary: g.summary,
-        x: 0, y: 0, vx: 0, vy: 0, fx: null, fy: null, r: 20 + filteredItems.length * 1.7
-      };
-      groupNodes.push(gn);
-      keep.push(gn);
+      const gn = { id: g.id, label: g.label, type: 'group', group: g.group, summary: g.summary, x: 0, y: 0, vx: 0, vy: 0, fx: null, fy: null, r: 22 + filteredItems.length * 1.2 };
+      groupNodes.push({ node: gn, items: filteredItems });
+      keep.push(gn); map.set(gn.id, gn);
       for (const item of filteredItems) {
-        const n = {
-          id: `${g.id}:${item.id}`,
-          label: item.label,
-          type: 'item',
-          group: g.group,
-          path: item.path,
-          summary: item.summary,
-          x: 0, y: 0, vx: 0, vy: 0, fx: null, fy: null, r: 8 + Math.min(5, item.label.length / 6)
-        };
-        keep.push(n);
+        const id = `${g.id}:${item.id}`;
+        const n = { id, label: item.label, type: 'item', group: g.group, path: item.path, summary: item.summary, x: 0, y: 0, vx: 0, vy: 0, fx: null, fy: null, r: 8 + Math.min(5, item.label.length / 6) };
+        keep.push(n); map.set(id, n);
       }
     }
 
-    const map = new Map(keep.map(n => [n.id, n]));
     const baseLinks = [];
-    for (const gn of groupNodes) baseLinks.push([root.id, gn.id]);
-    for (const g of DATA.groups) {
-      const items = DATA.items[g.group] || [];
-      if (scopeVal !== 'all' && scopeVal !== g.group) continue;
-      for (const item of items) {
-        const hay = norm(`${g.label} ${item.label} ${item.path} ${item.summary}`);
-        if (qv && !hay.includes(qv)) continue;
-        const id = `${g.id}:${item.id}`;
-        if (map.has(id)) baseLinks.push([g.id, id]);
-      }
+    for (const {node: gn, items} of groupNodes) {
+      baseLinks.push([root.id, gn.id]);
+      for (const item of items) baseLinks.push([gn.id, `${gn.id}:${item.id}`]);
     }
+    // subtle cross-links to mimic dense graph view
+    if (map.has('core')) {
+      for (const k of ['hermes','claude']) if (map.has(k)) baseLinks.push(['core', k]);
+    }
+    if (map.has('hermes') && map.has('claude')) baseLinks.push(['hermes', 'claude']);
+
     links = baseLinks.map(([s, t]) => ({ source: map.get(s), target: map.get(t) }));
 
-    // seed positions near clusters
-    root.x = W * 0.5; root.y = H * 0.45;
-    const radius = Math.min(W, H) * 0.22;
+    root.x = W * 0.5; root.y = H * 0.46;
+    const ring = Math.min(W, H) * 0.22;
     groupNodes.forEach((g, i) => {
-      const a = (-Math.PI / 2) + (i / Math.max(groupNodes.length, 1)) * Math.PI * 2;
-      g.x = root.x + Math.cos(a) * radius;
-      g.y = root.y + Math.sin(a) * radius * 0.9;
+      const a = -Math.PI / 2 + (i / Math.max(groupNodes.length, 1)) * Math.PI * 2;
+      g.node.x = root.x + Math.cos(a) * ring;
+      g.node.y = root.y + Math.sin(a) * ring * 0.9;
     });
     keep.filter(n => n.type === 'item').forEach((n, i) => {
-      const group = groupNodes.find(g => n.id.startsWith(g.id + ':'));
-      const jitter = 35 + (i % 4) * 8;
-      const a = (i * 2.3) % (Math.PI * 2);
-      n.x = group ? group.x + Math.cos(a) * jitter : root.x + Math.cos(a) * 80;
-      n.y = group ? group.y + Math.sin(a) * jitter : root.y + Math.sin(a) * 80;
+      const g = groupNodes.find(x => n.id.startsWith(x.node.id + ':'))?.node;
+      const jitter = 70 + (i % 5) * 10;
+      const a = (i * 1.87) % (Math.PI * 2);
+      n.x = g ? g.x + Math.cos(a) * jitter : root.x + Math.cos(a) * 100;
+      n.y = g ? g.y + Math.sin(a) * jitter : root.y + Math.sin(a) * 100;
     });
 
     nodes = keep;
@@ -231,10 +203,12 @@
   }
 
   function applyPhysics() {
-    const repulsion = 2200;
-    const spring = 0.01;
-    const center = 0.0015;
-    const damp = 0.86;
+    const repulsion = 3200;
+    const spring = 0.012;
+    const center = 0.0012;
+    const damp = 0.88;
+
+    const focus = selectedId ? nodes.find(n => n.id === selectedId) : null;
 
     for (let i = 0; i < nodes.length; i++) {
       const a = nodes[i];
@@ -242,14 +216,13 @@
         const b = nodes[j];
         let dx = b.x - a.x;
         let dy = b.y - a.y;
-        let d2 = dx*dx + dy*dy + 0.01;
+        let d2 = dx*dx + dy*dy + 0.02;
         let f = repulsion / d2;
         let d = Math.sqrt(d2);
         dx /= d; dy /= d;
-        if (selectedId) {
-          const sel = nodes.find(n => n.id === selectedId);
-          const related = sel && (a.id === sel.id || b.id === sel.id || links.some(l => (l.source===a&&l.target===b)||(l.source===b&&l.target===a) && (l.source.id===sel.id || l.target.id===sel.id)));
-          if (!related) f *= 0.28;
+        if (focus) {
+          const related = a.id === focus.id || b.id === focus.id || links.some(l => (l.source.id === focus.id && l.target.id === a.id) || (l.source.id === focus.id && l.target.id === b.id) || (l.target.id === focus.id && l.source.id === a.id) || (l.target.id === focus.id && l.source.id === b.id));
+          if (!related) f *= 0.25;
         }
         a.vx -= dx * f; a.vy -= dy * f;
         b.vx += dx * f; b.vy += dy * f;
@@ -260,7 +233,7 @@
       const a = l.source, b = l.target;
       const dx = b.x - a.x, dy = b.y - a.y;
       const dist = Math.sqrt(dx*dx + dy*dy) || 0.001;
-      const target = a.type === 'root' ? 200 : 110;
+      const target = a.type === 'root' ? 170 : (a.type === 'group' ? 92 : 56);
       const k = (dist - target) * spring;
       const nx = dx / dist, ny = dy / dist;
       a.vx += nx * k; a.vy += ny * k;
@@ -278,17 +251,13 @@
     if (dragging) {
       dragging.fx = (pointer.x - pan.x) / zoom;
       dragging.fy = (pointer.y - pan.y) / zoom;
-      dragging.x += (dragging.fx - dragging.x) * 0.22;
-      dragging.y += (dragging.fy - dragging.y) * 0.22;
+      dragging.x += (dragging.fx - dragging.x) * 0.24;
+      dragging.y += (dragging.fy - dragging.y) * 0.24;
     }
   }
 
-  function worldToScreen(x, y) {
-    return { x: x * zoom + pan.x, y: y * zoom + pan.y };
-  }
-  function screenToWorld(x, y) {
-    return { x: (x - pan.x) / zoom, y: (y - pan.y) / zoom };
-  }
+  function worldToScreen(x, y){ return { x: x * zoom + pan.x, y: y * zoom + pan.y }; }
+  function screenToWorld(x, y){ return { x: (x - pan.x) / zoom, y: (y - pan.y) / zoom }; }
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
@@ -296,64 +265,56 @@
     ctx.translate(pan.x, pan.y);
     ctx.scale(zoom, zoom);
 
-    // subtle halo behind root
     const root = nodes.find(n => n.type === 'root');
     if (root) {
-      const g = ctx.createRadialGradient(root.x, root.y, 0, root.x, root.y, 180);
+      const g = ctx.createRadialGradient(root.x, root.y, 0, root.x, root.y, 220);
       g.addColorStop(0, 'rgba(255,255,255,.08)');
       g.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(root.x, root.y, 180, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(root.x, root.y, 220, 0, Math.PI*2); ctx.fill();
     }
 
     const hoverNode = hoveredId ? nodes.find(n => n.id === hoveredId) : null;
     const focus = selectedId ? nodes.find(n => n.id === selectedId) : hoverNode;
 
-    // links
     for (const l of links) {
       const s = l.source, t = l.target;
-      let alpha = 0.14;
+      let alpha = 0.11;
       if (focus) {
-        const related = s.id === focus.id || t.id === focus.id || links.some(x => (x.source.id === focus.id && x.target.id === s.id) || (x.source.id === focus.id && x.target.id === t.id) || (x.target.id === focus.id && x.source.id === s.id) || (x.target.id === focus.id && x.source.id === t.id));
-        alpha = related ? 0.35 : 0.05;
+        const rel = s.id === focus.id || t.id === focus.id || (s.id.startsWith(focus.id + ':')) || (t.id.startsWith(focus.id + ':')) || (focus.id.startsWith(s.id + ':')) || (focus.id.startsWith(t.id + ':'));
+        alpha = rel ? 0.30 : 0.04;
       }
       ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.1;
       ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(t.x, t.y); ctx.stroke();
     }
 
-    // nodes
     for (const n of nodes) {
-      const isFocus = focus && (n.id === focus.id || links.some(l => (l.source.id === focus.id && l.target.id === n.id) || (l.target.id === focus.id && l.source.id === n.id)));
-      const isDim = focus && !isFocus;
-      const px = n.x, py = n.y;
+      const rel = !focus || n.id === focus.id || links.some(l => l.source.id === focus.id && l.target.id === n.id || l.target.id === focus.id && l.source.id === n.id || l.source.id === n.id && l.target.id.startsWith(focus.id + ':') || l.target.id === n.id && l.source.id.startsWith(focus.id + ':'));
+      const dim = focus && !rel;
       ctx.save();
-      ctx.globalAlpha = isDim ? 0.18 : 1;
+      ctx.globalAlpha = dim ? 0.16 : 1;
       if (n.type === 'root') {
-        ctx.fillStyle = '#fff';
-        ctx.beginPath(); ctx.arc(px, py, 26, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#0a0a0a'; ctx.font = '900 14px Inter, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('TanIA', px, py + 1);
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(n.x, n.y, 26, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#0a0a0a'; ctx.font = '900 14px Inter, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('TanIA', n.x, n.y + 1);
       } else if (n.type === 'group') {
-        ctx.fillStyle = '#d8d8d8';
-        ctx.beginPath(); ctx.arc(px, py, n.r, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.fillStyle = '#101010'; ctx.font = '800 12px Inter, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(n.label, px, py - 1);
-        ctx.fillStyle = '#8c8c8c'; ctx.font = '10px Inter, system-ui, sans-serif';
-        const count = links.filter(l => l.source.id === n.id || l.target.id === n.id).length - 1;
-        ctx.fillText(`${Math.max(count,0)} itens`, px, py + 13);
+        ctx.fillStyle = '#d8d8d8'; ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,.78)'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillStyle = '#101010'; ctx.font = '800 12px Inter, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(n.label, n.x, n.y - 1);
+        ctx.fillStyle = '#8d8d8d'; ctx.font = '10px Inter, system-ui, sans-serif';
+        const count = DATA.items[n.group].filter(item => {
+          const hay = norm(`${n.label} ${item.label} ${item.path} ${item.summary}`);
+          return !norm(q.value.trim()) || hay.includes(norm(q.value.trim()));
+        }).length;
+        ctx.fillText(`${count} itens`, n.x, n.y + 13);
+        if (focus && focus.id === n.id) {
+          ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 5, 0, Math.PI*2); ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 2; ctx.stroke();
+        }
       } else {
-        ctx.fillStyle = '#efefef';
-        ctx.beginPath(); ctx.arc(px, py, n.r, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#efefef'; ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
         if (focus && n.id === focus.id) {
-          ctx.fillStyle = '#fefefe';
-          ctx.beginPath(); ctx.arc(px, py, n.r + 4, 0, Math.PI*2); ctx.fill();
-          ctx.fillStyle = '#fff';
-          ctx.font = '800 12px Inter, system-ui, sans-serif';
-          ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-          ctx.fillText(n.label, px + 14, py - 2);
+          ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 4, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = '#fff'; ctx.font = '800 12px Inter, system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(n.label, n.x + 14, n.y - 2);
         }
       }
       ctx.restore();
@@ -366,9 +327,8 @@
     if (!node) { tip.classList.remove('show'); return; }
     tipT.textContent = node.label;
     tipM.textContent = node.type === 'root' ? node.summary : `${node.path || node.group} • ${node.summary}`;
-    const pad = 14;
-    const x = Math.min(window.innerWidth - 300 - pad, sx + 16);
-    const y = Math.min(window.innerHeight - 120 - pad, sy + 16);
+    const x = Math.min(window.innerWidth - 300 - 14, sx + 16);
+    const y = Math.min(window.innerHeight - 120 - 14, sy + 16);
     tip.style.left = x + 'px';
     tip.style.top = y + 'px';
     tip.classList.add('show');
@@ -380,8 +340,8 @@
     for (const n of nodes) {
       const dx = n.x - p.x, dy = n.y - p.y;
       const d = Math.sqrt(dx*dx + dy*dy);
-      const limit = n.type === 'group' ? n.r + 10 : n.r + 8;
-      if (d < limit && d < bestD) { best = n; bestD = d; }
+      const lim = n.type === 'group' ? n.r + 12 : n.r + 8;
+      if (d < lim && d < bestD) { best = n; bestD = d; }
     }
     return best;
   }
@@ -411,9 +371,6 @@
       infoK.textContent = n.label;
       infoV.textContent = n.type === 'root' ? 'Núcleo central da malha.' : (n.path || n.summary);
       infoS.textContent = n.summary;
-      build(); // rebuild links/visible set on click? keep graph in sync with search only; harmless.
-    } else {
-      dragging = null;
     }
   });
   window.addEventListener('mouseup', () => { if (dragging) { dragging.fx = dragging.fy = null; } dragging = null; });
@@ -428,7 +385,7 @@
     if (!n) {
       selectedId = null;
       infoK.textContent = 'Visão geral';
-      infoV.textContent = 'Passe o mouse ou clique em um nó. A rede começa densa o suficiente para parecer graph view, mas ainda legível.';
+      infoV.textContent = 'Passe o mouse ou clique em um nó.';
       infoS.textContent = 'Dica: a busca reduz a malha e destaca os nós conectados.';
     } else {
       selectedId = n.id;
@@ -441,7 +398,7 @@
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     const delta = Math.sign(e.deltaY) * -0.08;
-    const next = Math.min(2.2, Math.max(0.55, zoom + delta));
+    const next = Math.min(2.4, Math.max(0.55, zoom + delta));
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
@@ -472,11 +429,11 @@
     zoom = 1;
     build();
     infoK.textContent = 'Visão geral';
-    infoV.textContent = 'Passe o mouse ou clique em um nó. A rede começa densa o suficiente para parecer graph view, mas ainda legível.';
+    infoV.textContent = 'Passe o mouse ou clique em um nó.';
     infoS.textContent = 'Dica: a busca reduz a malha e destaca os nós conectados.';
   });
 
-  window.addEventListener('resize', () => { resize(); });
+  window.addEventListener('resize', resize);
 
   function frame() {
     applyPhysics();
