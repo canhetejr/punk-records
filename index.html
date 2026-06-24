@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Super Cérebro Local</title>
+  <style>
+    :root {
+      --bg: #0a0a0a; --panel: #101010; --panel2: #151515; --line: #2a2a2a; --text: #f4f4f4; --muted: #a6a6a6; --radius: 18px; --shadow: 0 18px 50px rgba(0,0,0,.42);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: radial-gradient(circle at top, #181818 0%, #0a0a0a 56%, #050505 100%); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; }
+    .wrap { max-width: 1440px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
+    h1 { margin: 0; font-size: clamp(30px, 4vw, 50px); line-height: 1; letter-spacing: -0.05em; }
+    .lead { margin: 10px 0 0; color: var(--muted); max-width: 76ch; }
+    .meta { color: var(--muted); font-size: 14px; text-align: right; }
+    .grid { display: grid; gap: 14px; }
+    .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 18px 0 18px; }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .stat { padding: 18px; min-height: 110px; display: flex; flex-direction: column; justify-content: space-between; }
+    .label { color: var(--muted); font-size: 12px; letter-spacing: .09em; text-transform: uppercase; }
+    .value { font-size: clamp(24px, 3vw, 42px); font-weight: 800; letter-spacing: -0.05em; }
+    .sub { color: var(--muted); font-size: 13px; }
+    .controls { display: grid; grid-template-columns: 1.6fr .7fr .7fr; gap: 12px; margin: 8px 0 18px; }
+    .input, .select { width: 100%; background: #0c0c0c; color: var(--text); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; outline: none; }
+    .input::placeholder { color: #777; }
+    .section { margin-top: 18px; }
+    .section h2 { margin: 0 0 10px; font-size: 20px; letter-spacing: -.03em; }
+    .note { margin: 0 0 12px; color: var(--muted); }
+    .pillrow { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill, .tag { border: 1px solid var(--line); background: #0d0d0d; border-radius: 999px; }
+    .pill { padding: 8px 12px; font-size: 13px; }
+    .tag { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; margin: 0 8px 8px 0; }
+    .tag small { color: var(--muted); }
+    .split { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+    details.card summary { list-style: none; cursor: pointer; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+    details.card summary::-webkit-details-marker { display: none; }
+    .details-body { padding: 16px 18px 18px; }
+    .cat-grid { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cat-card { padding: 16px; background: #0e0e0e; border: 1px solid var(--line); border-radius: 16px; }
+    .cat-card .name { font-size: 18px; font-weight: 750; margin-bottom: 8px; }
+    .cat-card .mini { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .tablewrap { overflow: auto; border-radius: var(--radius); border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; min-width: 1120px; background: rgba(0,0,0,.15); }
+    th, td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.06); vertical-align: top; }
+    th { position: sticky; top: 0; background: #101010; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #d8d8d8; }
+    tr:hover td { background: rgba(255,255,255,.03); }
+    .path { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; word-break: break-all; }
+    .muted { color: var(--muted); }
+    footer { margin: 24px 0 8px; color: var(--muted); font-size: 13px; text-align: center; }
+    @media (max-width: 1000px) { .stats, .controls, .split, .cat-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 720px) { .wrap { padding: 14px; } .stats, .controls, .split, .cat-grid { grid-template-columns: 1fr; } .meta { text-align: left; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Super Cérebro Local</h1>
+        <p class="lead">Visualização HTML do índice local de contexto. Reúne o estado atual do cérebro, estatísticas, categorias, itens recentes e os blocos mais densos de conhecimento.</p>
+      </div>
+      <div class="meta">
+        <div><strong>Gerado:</strong> 2026-06-24</div>
+        <div><strong>Repo:</strong> ai-brain-cleanup</div>
+      </div>
+    </div>
+
+    <div class="grid stats">
+      <div class="card stat"><div class="label">Itens indexados</div><div class="value">529</div><div class="sub">3 categorias</div></div>
+      <div class="card stat"><div class="label">Com texto</div><div class="value">424</div><div class="sub">80.0% do total</div></div>
+      <div class="card stat"><div class="label">Segredo redigido</div><div class="value">8</div><div class="sub">metadados apenas</div></div>
+      <div class="card stat"><div class="label">Tamanho bruto</div><div class="value">10.7 MB</div><div class="sub">2.861.801 chars indexados</div></div>
+    </div>
+
+    <div class="section">
+      <h2>Visão rápida</h2>
+      <div class="pillrow">
+        <div class="pill"><b>529</b> itens</div>
+        <div class="pill"><b>424</b> com texto</div>
+        <div class="pill"><b>8</b> redigidos</div>
+        <div class="pill"><b>3</b> categorias</div>
+        <div class="pill"><b>10.7 MB</b> de volume bruto</div>
+      </div>
+    </div>
+
+    <div class="section split">
+      <details class="card" open>
+        <summary><strong>Categorias principais</strong> <span class="muted">(clique para recolher)</span></summary>
+        <div class="details-body cat-grid">
+          <div class="cat-card"><div class="name">hermes</div><div class="mini"><div><strong>518</strong> itens</div><div><strong>414</strong> com texto</div><div><strong>2.856.898</strong> chars indexados</div><div><strong>10.7 MB</strong> bruto</div></div></div>
+          <div class="cat-card"><div class="name">ai-brain-core</div><div class="mini"><div><strong>10</strong> itens</div><div><strong>9</strong> com texto</div><div><strong>4.903</strong> chars indexados</div><div><strong>0.0 MB</strong> bruto</div></div></div>
+          <div class="cat-card"><div class="name">claude</div><div class="mini"><div><strong>1</strong> itens</div><div><strong>1</strong> com texto</div><div><strong>0</strong> chars indexados</div><div><strong>0.0 MB</strong> bruto</div></div></div>
+        </div>
+      </details>
+
+      <details class="card" open>
+        <summary><strong>Blocos de conhecimento densos</strong> <span class="muted">(top 24)</span></summary>
+        <div class="details-body">
+          <div class="pillrow">
+            <div class="tag"><b>hermes</b> Architecture Reference <small>20000</small></div>
+            <div class="tag"><b>hermes</b> Composition & Brightness Reference <small>20000</small></div>
+            <div class="tag"><b>hermes</b> Effect Catalog <small>20000</small></div>
+            <div class="tag"><b>hermes</b> Input Sources <small>20000</small></div>
+            <div class="tag"><b>hermes</b> Optimization Reference <small>20000</small></div>
+            <div class="tag"><b>hermes</b> Scene System & Creative Composition <small>20000</small></div>
+            <div class="tag"><b>hermes</b> Shader Pipeline & Composable Effects <small>20000</small></div>
+            <div class="tag"><b>hermes</b> SKILL.md <small>20000</small></div>
+            <div class="tag"><b>hermes</b> SKILL.md <small>20000</small></div>
+            <div class="tag"><b>hermes</b> SKILL.md <small>20000</small></div>
+            <div class="tag"><b>hermes</b> Design System: Apple <small>20000</small></div>
+            <div class="tag"><b>hermes</b> Design System: Claude (Anthropic) <small>20000</small></div>
+          </div>
+          <p class="note">Os arquivos acima concentram protocolos, skills e documentação útil. Se a view ficar grande, use a busca no campo superior.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="section">
+      <h2>Itens recentes</h2>
+      <p class="note">Ordenado por data de modificação.</p>
+      <div class="tablewrap">
+        <table id="recentTable">
+          <thead><tr><th>Categoria</th><th>Título</th><th>Caminho</th><th>Chars</th><th>Atualizado</th></tr></thead>
+          <tbody>
+            <tr><td>ai-brain-core</td><td>Índice mestre do AI Brain</td><td class="path">~/.ai-brain/INDEX.md</td><td>901</td><td class="muted">2026-06-24 15:51:42 </td></tr>
+            <tr><td>ai-brain-core</td><td>AI Brain local</td><td class="path">~/.ai-brain/README.md</td><td>1266</td><td class="muted">2026-06-24 15:51:42 </td></tr>
+            <tr><td>ai-brain-core</td><td>brain_config.yaml</td><td class="path">~/obsidian-vault/AI Brain/ai-brain/brain_config.yaml</td><td>2088</td><td class="muted">2026-06-24 15:51:37 </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Índice navegável</h2>
+      <p class="note">A página do GitHub Pages vai mostrar a versão estática do cérebro.</p>
+      <div class="pillrow">
+        <div class="pill">Abra a view e depois publique o repositório no GitHub Pages.</div>
+      </div>
+    </div>
+
+    <footer>Super Cérebro Local • HTML pronto para GitHub Pages</footer>
+  </div>
+</body>
+</html>
