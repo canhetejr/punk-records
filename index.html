@@ -2,12 +2,332 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="refresh" content="0; url=./SUPER_CEREBRO_VIEW.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Super Cérebro Local</title>
-  <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0a0a0a;color:#f4f4f4;font-family:system-ui,sans-serif}a{color:#fff}</style>
+  <title>Super Cérebro • Grafo</title>
+  <style>
+    :root {
+      --bg:#060606; --panel:#0f0f0f; --panel2:#151515; --line:#2a2a2a; --text:#f4f4f4; --muted:#a0a0a0;
+      --accent:#f2f2f2; --accent2:#7a7a7a; --good:#d7d7d7; --danger:#ff8a8a; --radius:20px;
+      --shadow:0 18px 60px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:radial-gradient(circle at top,#171717 0%,#090909 55%,#040404 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
+    .app{min-height:100vh;display:grid;grid-template-rows:auto auto 1fr;gap:14px;padding:20px}
+    .top{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-end}
+    h1{margin:0;font-size:clamp(30px,4.6vw,56px);letter-spacing:-.06em;line-height:.95}
+    .lead{margin:10px 0 0;max-width:76ch;color:var(--muted)}
+    .meta{color:var(--muted);text-align:right;font-size:14px}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .stat{padding:16px 18px;min-height:100px;display:flex;flex-direction:column;justify-content:space-between}
+    .label{font-size:12px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted)}
+    .value{font-size:clamp(22px,2.6vw,38px);font-weight:800;letter-spacing:-.05em}
+    .sub{color:var(--muted);font-size:13px}
+    .controls{display:grid;grid-template-columns:1.4fr .8fr .8fr auto;gap:12px}
+    .input,.select,.btn{width:100%;border:1px solid var(--line);border-radius:14px;background:#0a0a0a;color:var(--text);padding:14px 16px;font:inherit;outline:none}
+    .btn{cursor:pointer;background:#f2f2f2;color:#0a0a0a;font-weight:700}
+    .layout{display:grid;grid-template-columns:minmax(0,1.6fr .9fr);gap:14px;align-items:start}
+    .graphWrap{position:relative;overflow:hidden;padding:14px;min-height:640px}
+    .graphBar{position:absolute;left:16px;top:16px;right:16px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;z-index:2;pointer-events:none}
+    .pill{pointer-events:none;border:1px solid var(--line);background:rgba(10,10,10,.75);border-radius:999px;padding:7px 11px;color:var(--muted);font-size:12px;backdrop-filter:blur(8px)}
+    .pill b{color:var(--text)}
+    svg{display:block;width:100%;height:640px;touch-action:none}
+    .panel{padding:18px}
+    .panel h2{margin:0 0 8px;font-size:22px;letter-spacing:-.03em}
+    .panel .note{margin:0 0 16px;color:var(--muted)}
+    .detail{display:grid;gap:10px}
+    .detailBox{padding:14px;border:1px solid var(--line);border-radius:16px;background:#0c0c0c}
+    .detailBox .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+    .detailBox .v{font-size:16px;line-height:1.45}
+    .small{font-size:13px;color:var(--muted)}
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .legend .pill{background:#0c0c0c}
+    .hint{margin-top:14px;color:var(--muted);font-size:13px;line-height:1.5}
+    .footer{color:var(--muted);font-size:13px;text-align:center;padding:4px 0 0}
+    @media (max-width: 1080px){
+      .stats,.controls,.layout{grid-template-columns:1fr 1fr}
+      .layout{grid-template-columns:1fr}
+      .graphWrap{min-height:540px}
+      svg{height:540px}
+    }
+    @media (max-width: 720px){
+      .app{padding:14px}
+      .stats,.controls{grid-template-columns:1fr}
+      .meta{text-align:left}
+      .graphWrap{padding:10px;min-height:470px}
+      svg{height:470px}
+    }
+    .node{cursor:pointer;transition:transform .12s ease, opacity .12s ease;transform-origin:center}
+    .node:hover{transform:scale(1.05)}
+    .link{stroke:rgba(255,255,255,.18);stroke-width:1.4}
+    .link.fade{stroke:rgba(255,255,255,.06)}
+    .catNode{fill:#d9d9d9;stroke:#fff;stroke-width:1}
+    .rootNode{fill:#fff}
+    .itemNode{fill:#f1f1f1;stroke:#232323;stroke-width:1}
+    .itemNode.dim,.catNode.dim,.link.dim,.labelText.dim{opacity:.18}
+    .selected .itemNode,.selected .catNode{fill:#fff}
+    .selected .labelText{fill:#fff;font-weight:800}
+    .labelText{fill:#dcdcdc;font-size:12px;font-weight:600;pointer-events:none;text-anchor:middle}
+    .subLabel{fill:#9f9f9f;font-size:11px;pointer-events:none;text-anchor:middle}
+    .rootLabel{fill:#0a0a0a;font-size:14px;font-weight:800;pointer-events:none;text-anchor:middle}
+  </style>
 </head>
 <body>
-  <div>Redirecionando para <a href="./SUPER_CEREBRO_VIEW.html">SUPER_CEREBRO_VIEW.html</a>…</div>
+  <div class="app">
+    <div class="top">
+      <div>
+        <h1>Super Cérebro • Grafo</h1>
+        <p class="lead">Versão enxuta e interativa: poucos nós, foco visual claro e clique para explorar categorias, itens e conexões sem te entupir de dados.</p>
+      </div>
+      <div class="meta">
+        <div><strong>Modo:</strong> grafo interativo</div>
+        <div><strong>Atualizado:</strong> agora</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="card stat"><div class="label">Categorias</div><div class="value" id="statCats">3</div><div class="sub">núcleo compacto</div></div>
+      <div class="card stat"><div class="label">Nós visíveis</div><div class="value" id="statNodes">0</div><div class="sub">filtrados no momento</div></div>
+      <div class="card stat"><div class="label">Foco</div><div class="value" id="statFocus">Todos</div><div class="sub">toque num nó</div></div>
+      <div class="card stat"><div class="label">Busca</div><div class="value" id="statQuery">—</div><div class="sub">filtra em tempo real</div></div>
+    </div>
+
+    <div class="controls">
+      <input id="q" class="input" type="search" placeholder="Buscar por título, caminho ou nota..." />
+      <select id="cat" class="select">
+        <option value="">Todas as categorias</option>
+      </select>
+      <select id="limit" class="select">
+        <option value="2">2 itens por categoria</option>
+        <option value="3" selected>3 itens por categoria</option>
+        <option value="4">4 itens por categoria</option>
+        <option value="999">Todos os itens</option>
+      </select>
+      <button id="reset" class="btn">Reset</button>
+    </div>
+
+    <div class="layout">
+      <div class="card graphWrap">
+        <div class="graphBar">
+          <div class="pill"><b>Interação:</b> clique em um nó para focar</div>
+          <div class="pill"><b>Escopo:</b> poucos nós + resposta visual rápida</div>
+        </div>
+        <svg id="svg" viewBox="0 0 1200 720" aria-label="Grafo interativo do Super Cérebro" role="img"></svg>
+      </div>
+
+      <div class="card panel">
+        <h2 id="dTitle">Selecione um nó</h2>
+        <p class="note" id="dNote">Clique em uma categoria ou item para ver o detalhe mínimo aqui. O grafo fica limpo e legível.</p>
+        <div class="detail">
+          <div class="detailBox"><div class="k">Categoria</div><div class="v" id="dCat">—</div></div>
+          <div class="detailBox"><div class="k">Caminho</div><div class="v small" id="dPath">—</div></div>
+          <div class="detailBox"><div class="k">Resumo</div><div class="v" id="dSummary">—</div></div>
+        </div>
+        <div class="legend">
+          <div class="pill"><b>Branco</b> núcleo</div>
+          <div class="pill"><b>Cinza</b> categoria</div>
+          <div class="pill"><b>Claro</b> item</div>
+        </div>
+        <div class="hint">Dica: use a busca para reduzir o grafo. O botão Reset limpa o foco e volta para a visão geral.</div>
+      </div>
+    </div>
+
+    <div class="footer">TanIA • grafo compacto para GitHub Pages</div>
+  </div>
+
+  <script>
+    const DATA = [
+      { cat: 'ai-brain-core', name: 'Índice mestre do AI Brain', path: '~/.ai-brain/INDEX.md', summary: 'Visão geral do índice local do cérebro.', score: 98 },
+      { cat: 'ai-brain-core', name: 'AI Brain local', path: '~/.ai-brain/README.md', summary: 'Mapa do diretório e do fluxo local.', score: 90 },
+      { cat: 'ai-brain-core', name: 'brain_config.yaml', path: '~/obsidian-vault/AI Brain/ai-brain/brain_config.yaml', summary: 'Configuração do cérebro e identidade.', score: 84 },
+      { cat: 'ai-brain-core', name: 'Super Cérebro Local', path: '~/obsidian-vault/AI Brain/ai-brain/SUPER_CEREBRO.md', summary: 'Documento central do cérebro local.', score: 76 },
+      { cat: 'hermes', name: 'Hermes Agent', path: '~/.hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md', summary: 'Skill principal para operar Hermes.', score: 96 },
+      { cat: 'hermes', name: 'Super Cérebro Bridge', path: '~/.hermes/skills/autonomous-ai-agents/super-cerebro-bridge/SKILL.md', summary: 'Ponte entre Hermes e o cérebro local.', score: 89 },
+      { cat: 'hermes', name: 'Knowledge Work Automation', path: '~/.hermes/skills/productivity/knowledge-work-automation/SKILL.md', summary: 'Automação para trabalho de conhecimento.', score: 81 },
+      { cat: 'hermes', name: 'Docker Compose Apps', path: '~/.hermes/skills/devops/docker-compose-self-hosted-apps/SKILL.md', summary: 'Deploy e verificação de apps self-hosted.', score: 73 },
+      { cat: 'hermes', name: 'Visual Artifact Studio', path: '~/.hermes/skills/creative/visual-artifact-studio/SKILL.md', summary: 'Artefatos visuais e páginas HTML.', score: 79 },
+      { cat: 'claude', name: 'settings.json', path: '~/.claude/settings.json', summary: 'Configuração do Claude local.', score: 70 },
+    ];
+
+    const cats = [...new Set(DATA.map(d => d.cat))];
+    const byCat = Object.fromEntries(cats.map(c => [c, DATA.filter(d => d.cat === c)]));
+    const svg = document.getElementById('svg');
+    const q = document.getElementById('q');
+    const cat = document.getElementById('cat');
+    const limit = document.getElementById('limit');
+    const reset = document.getElementById('reset');
+    const statNodes = document.getElementById('statNodes');
+    const statFocus = document.getElementById('statFocus');
+    const statQuery = document.getElementById('statQuery');
+    const dTitle = document.getElementById('dTitle');
+    const dNote = document.getElementById('dNote');
+    const dCat = document.getElementById('dCat');
+    const dPath = document.getElementById('dPath');
+    const dSummary = document.getElementById('dSummary');
+
+    for (const c of cats) {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      cat.appendChild(opt);
+    }
+
+    let focusedCat = '';
+    let selected = null;
+    let query = '';
+
+    function el(name, attrs = {}) {
+      const n = document.createElementNS('http://www.w3.org/2000/svg', name);
+      for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+      return n;
+    }
+
+    function norm(s) { return String(s || '').toLowerCase(); }
+
+    function applyFilter() {
+      query = q.value.trim().toLowerCase();
+      focusedCat = cat.value;
+      const lim = Number(limit.value);
+
+      const visible = DATA.filter(d => {
+        const hay = `${d.cat} ${d.name} ${d.path} ${d.summary}`.toLowerCase();
+        if (focusedCat && d.cat !== focusedCat) return false;
+        if (query && !hay.includes(query)) return false;
+        return true;
+      });
+
+      const perCat = new Map();
+      for (const c of cats) perCat.set(c, []);
+      for (const item of visible.sort((a,b) => b.score - a.score)) {
+        const arr = perCat.get(item.cat);
+        if (lim === 999 || arr.length < lim) arr.push(item);
+      }
+
+      render(perCat);
+      statNodes.textContent = String(Array.from(perCat.values()).reduce((a, b) => a + b.length, 0));
+      statFocus.textContent = focusedCat || 'Todos';
+      statQuery.textContent = query ? query.slice(0, 16) : '—';
+    }
+
+    function render(perCat) {
+      svg.innerHTML = '';
+      const W = 1200, H = 720, cx = 600, cy = 360;
+      const rootR = 46;
+      const catRadius = 33;
+      const itemR = 13;
+      const activeCats = cats.filter(c => perCat.get(c).length);
+      const ring = 235;
+
+      const defs = el('defs');
+      defs.innerHTML = `<linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/><stop offset="100%" stop-color="#8e8e8e" stop-opacity="0.18"/></linearGradient>`;
+      svg.appendChild(defs);
+      svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: 'transparent' }));
+
+      const positions = activeCats.map((c, i) => {
+        const a = -Math.PI / 2 + (Math.PI * 2 * i) / Math.max(activeCats.length, 1);
+        return { cat: c, x: cx + Math.cos(a) * ring, y: cy + Math.sin(a) * ring, angle: a };
+      });
+
+      // Links root -> cats
+      for (const p of positions) {
+        svg.appendChild(el('line', { x1: cx, y1: cy, x2: p.x, y2: p.y, class: 'link' }));
+      }
+
+      // Items
+      for (const p of positions) {
+        const items = perCat.get(p.cat);
+        const itemSpread = 98 + items.length * 8;
+        items.forEach((item, idx) => {
+          const t = items.length === 1 ? 0 : (idx / (items.length - 1) - 0.5);
+          const a = p.angle + t * 0.95;
+          const x = p.x + Math.cos(a) * itemSpread;
+          const y = p.y + Math.sin(a) * itemSpread;
+          svg.appendChild(el('line', { x1: p.x, y1: p.y, x2: x, y2: y, class: 'link fade' }));
+          const g = el('g', { class: 'node item' + (selected === item ? ' selected' : '') });
+          g.appendChild(el('title', {})).textContent = `${item.name} • ${item.cat}\n${item.path}`;
+          g.appendChild(el('circle', { cx: x, cy: y, r: itemR, class: 'itemNode' }));
+          g.addEventListener('click', () => select(item));
+          svg.appendChild(g);
+        });
+      }
+
+      // Category nodes
+      for (const p of positions) {
+        const g = el('g', { class: 'node cat' + (focusedCat === p.cat ? ' selected' : '') });
+        const c = el('circle', { cx: p.x, cy: p.y, r: catRadius, class: 'catNode' });
+        g.appendChild(c);
+        const t1 = el('text', { x: p.x, y: p.y + 5, class: 'labelText' });
+        t1.textContent = p.cat;
+        g.appendChild(t1);
+        const t2 = el('text', { x: p.x, y: p.y + 24, class: 'subLabel' });
+        t2.textContent = String(perCat.get(p.cat).length) + ' itens';
+        g.appendChild(t2);
+        g.addEventListener('click', () => {
+          cat.value = cat.value === p.cat ? '' : p.cat;
+          applyFilter();
+          setDetails({ cat: p.cat, name: p.cat, path: 'categoria', summary: 'Clique para focar ou limpar o filtro.' });
+        });
+        svg.appendChild(g);
+      }
+
+      const root = el('g', { class: 'node root' });
+      root.appendChild(el('circle', { cx, cy, r: rootR, class: 'rootNode' }));
+      const rt = el('text', { x: cx, y: cy + 5, class: 'rootLabel' });
+      rt.textContent = 'TanIA';
+      root.appendChild(rt);
+      svg.appendChild(root);
+
+      if (selected && !visibleIn(perCat, selected)) {
+        selected = null;
+      }
+      if (!selected) setDetails(null);
+      if (selected) setDetails(selected);
+
+      function visibleIn(map, item) {
+        return map.get(item.cat)?.some(x => x.name === item.name);
+      }
+    }
+
+    function setDetails(item) {
+      if (!item) {
+        dTitle.textContent = 'Visão limpa';
+        dNote.textContent = 'Sem foco ativo. Selecione um nó para ver apenas o essencial.';
+        dCat.textContent = '—';
+        dPath.textContent = '—';
+        dSummary.textContent = 'Clique em um item ou categoria.';
+        return;
+      }
+      dTitle.textContent = item.name || item.cat;
+      dNote.textContent = item.cat === 'categoria' ? 'Categoria selecionada.' : 'Item selecionado.';
+      dCat.textContent = item.cat;
+      dPath.textContent = item.path || '—';
+      dSummary.textContent = item.summary || '—';
+    }
+
+    function select(item) {
+      selected = item;
+      setDetails(item);
+      applyFilter();
+    }
+
+    q.addEventListener('input', applyFilter);
+    cat.addEventListener('change', () => { selected = null; applyFilter(); });
+    limit.addEventListener('change', applyFilter);
+    reset.addEventListener('click', () => {
+      q.value = '';
+      cat.value = '';
+      limit.value = '3';
+      selected = null;
+      applyFilter();
+    });
+
+    svg.addEventListener('click', (e) => {
+      if (e.target === svg || e.target.tagName === 'rect') {
+        selected = null;
+        setDetails(null);
+      }
+    });
+
+    applyFilter();
+  </script>
 </body>
 </html>
