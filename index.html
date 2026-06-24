@@ -77,6 +77,7 @@
 <script>
   const DATA = {
     root: { id: 'tania', label: 'TanIA', type: 'root', group: 'root', summary: 'Núcleo do cérebro.' },
+    signature: { id: 'tania-selo', label: 'Selo TanIA', type: 'signature', group: 'root', summary: 'Assinatura visual exclusiva da TanIA.' },
     groups: [
       { id: 'core', label: 'Core', group: 'core', summary: 'Arquivos centrais do AI Brain.' },
       { id: 'hermes', label: 'Hermes', group: 'hermes', summary: 'Skills e protocolos Hermes.' },
@@ -152,6 +153,9 @@
     const root = { id: DATA.root.id, label: DATA.root.label, type: 'root', group: 'root', summary: DATA.root.summary, x: 0, y: 0, vx: 0, vy: 0, fx: null, fy: null, r: 28 };
     keep.push(root); map.set(root.id, root);
 
+    const signature = { id: DATA.signature.id, label: DATA.signature.label, type: 'signature', group: 'root', summary: DATA.signature.summary, x: 0, y: 0, vx: 0, vy: 0, fx: null, fy: null, r: 12 };
+    keep.push(signature); map.set(signature.id, signature);
+
     const groupNodes = [];
     for (const g of DATA.groups) {
       if (scopeVal !== 'all' && scopeVal !== g.group) continue;
@@ -175,6 +179,7 @@
       baseLinks.push([root.id, gn.id]);
       for (const item of items) baseLinks.push([gn.id, `${gn.id}:${item.id}`]);
     }
+    baseLinks.push([root.id, signature.id]);
     // subtle cross-links to mimic dense graph view
     if (map.has('core')) {
       for (const k of ['hermes','claude']) if (map.has(k)) baseLinks.push(['core', k]);
@@ -190,6 +195,8 @@
       g.node.x = root.x + Math.cos(a) * ring;
       g.node.y = root.y + Math.sin(a) * ring * 0.9;
     });
+    signature.x = root.x + 72;
+    signature.y = root.y - 78;
     keep.filter(n => n.type === 'item').forEach((n, i) => {
       const g = groupNodes.find(x => n.id.startsWith(x.node.id + ':'))?.node;
       const jitter = 70 + (i % 5) * 10;
@@ -297,6 +304,10 @@
       if (n.type === 'root') {
         ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(n.x, n.y, 26, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = '#0a0a0a'; ctx.font = '900 14px Inter, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('TanIA', n.x, n.y + 1);
+      } else if (n.type === 'signature') {
+        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(n.x, n.y, 10, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(n.x, n.y, 14, 0, Math.PI*2); ctx.stroke();
+        ctx.fillStyle = '#f5f5f5'; ctx.font = '700 9px Inter, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('T', n.x, n.y + 0.5);
       } else if (n.type === 'group') {
         ctx.fillStyle = '#d8d8d8'; ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = 'rgba(255,255,255,.78)'; ctx.lineWidth = 1; ctx.stroke();
