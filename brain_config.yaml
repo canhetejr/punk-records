@@ -1,0 +1,113 @@
+identity:
+  profile: ~/.ai-brain/IDENTITY.md
+
+sources:
+  - name: ai-brain-core
+    tier: 1
+    roots:
+      - ~/.ai-brain/AGENT_PROTOCOL.md
+      - ~/.ai-brain/SUPER_CEREBRO.md
+      - ~/.ai-brain/README.md
+      - ~/.ai-brain/INDEX.md
+      - ~/.ai-brain/brain_config.yaml
+    globs:
+      - ~/.ai-brain/scripts/*.py
+      - ~/.ai-brain/tests/*.py
+      - ~/.ai-brain/*.md
+
+  - name: instrucoes-autorais
+    tier: 1
+    roots:
+      - ~/.claude/CLAUDE.md
+      - ~/.codex/AGENTS.md
+      - ~/.gemini/GEMINI.md
+      - ~/AGENTS.md
+      - ~/antigravity/AGENTS.md
+
+  - name: configs
+    tier: 1
+    globs:
+      - ~/.claude/settings.json
+      - ~/.codex/config.toml
+      - ~/.mcp.json
+
+  - name: skills-autorais
+    tier: 1
+    include:
+      - ~/.hermes/skills
+      - ~/.claude/skills
+      - ~/.claude/commands
+    globs:
+      - ~/.hermes/skills/**/SKILL.md
+      - ~/.claude/skills/**/SKILL.md
+      - ~/.claude/commands/**
+
+  - name: projetos-locais
+    tier: 1
+    project_roots:
+      - ~/antigravity/*
+      - "~/Área de trabalho/1 - Projetos/**"
+      - "~/Área de trabalho/canhete-core-antigravity/**"
+      - "~/Documentos/Projeto enade/**"
+      - ~/pc-dashboard/**
+      - ~/contexts/**
+      - ~/.hermes/hermes-agent/**
+    project_files:
+      - AGENTS.md
+      - CLAUDE.md
+      - GEMINI.md
+      - CODEX.md
+      - README.md
+      - PROJECT_SPEC.md
+      - package.json
+      - pyproject.toml
+      - requirements.txt
+      - docker-compose.yml
+      - Dockerfile
+      - docs/**/*.md
+
+  - name: obsidian
+    tier: 2
+    roots:
+      - "~/Área de trabalho/Obsidian/**"
+    exclude:
+      - "**/.obsidian/**"
+      - "**/node_modules/**"
+      - "**/.trash/**"
+      - "**/Hermes Skills/**"
+
+  - name: sessoes
+    tier: 2
+    summarize: true
+
+exclude_always:
+  - "**/cache/**"
+  - "**/marketplaces/**"
+  - "**/.tmp/plugins/**"
+  - "**/plugins/cache/**"
+  - "**/extensions/**"
+  - "**/resources/app/**"
+  - "**/agent-plugins/github.com/**"
+  - "**/website/**"
+  - "**/i18n/**"
+  - "**/node_modules/**"
+  - "**/.git/**"
+  - "**/.venv/**"
+  - "**/venv/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.next/**"
+  - "**/target/**"
+  - "**/__pycache__/**"
+  - "**/.pytest_cache/**"
+  - "**/.mypy_cache/**"
+  - "**/.ruff_cache/**"
+  - "**/*.log"
+
+archive:
+  enabled: false
+  db: ~/.ai-brain/archive_index.sqlite
+  sources:
+    - ~/.codex/sessions/**
+    - ~/.claude/projects/**
+    - ~/antigravity/pdf-to-md/md/**
