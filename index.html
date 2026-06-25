@@ -141,6 +141,7 @@
     people: [
       { id: 'silvia', label: 'silvIA', type: 'person', group: 'root', summary: 'Nó pessoal ligado ao cérebro TanIA.', role: 'Silvia' },
       { id: 'jorge', label: 'Jorge', type: 'person', group: 'root', summary: 'Nó pessoal ligado ao cérebro TanIA.', role: 'Jorge' },
+      { id: 'luiz', label: 'Luiz', type: 'person', group: 'root', summary: 'Nó pessoal com o histórico de solicitações do usuário.', role: 'Luiz' },
     ],
     groups: [
       { id: 'core', label: 'Core', group: 'core', summary: 'Arquivos centrais do AI Brain.' },
@@ -362,6 +363,7 @@
 - **Hermes**: skills e protocolos
 - **Claude**: configuração e referências
 - **silvIA** e **Jorge**: nós pessoais ligados ao núcleo
+- **Luiz**: nó pessoal com o histórico das solicitações
 
 ## Como funciona
 
@@ -376,6 +378,32 @@ Clique em qualquer nó para abrir a nota em *markdown*, igual a um preview de Ob
     }
 
     if (isPerson) {
+      if (node.id === 'luiz') {
+        return `# Luiz
+
+> Arquivo pessoal com o histórico das suas solicitações.
+
+## Histórico de solicitações
+
+- Manda o link do GitHub do cérebro só site no Pages
+- Cria um modal de visualização e faz o clique no grafo abrir a nota como no Obsidian
+- Adiciona nós para **silvIA** e **Jorge**
+- Quero ver as notas em **md**
+- Adiciona um node só meu do Luiz com todo o histórico de solicitações
+
+## Leitura rápida
+
+Esse nó funciona como um índice pessoal: ele liga sua linha de pedidos ao cérebro TanIA e mantém o contexto juntinho do grafo.
+
+## Propriedades
+
+- \`name\`: Luiz
+- \`role\`: Luiz
+- \`view\`: history-note
+- \`parent\`: TanIA
+`;
+      }
+
       return `# ${node.label}
 
 > ${node.summary}
