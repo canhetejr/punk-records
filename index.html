@@ -47,6 +47,19 @@
     .metaBox .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
     .metaBox .v{font-size:13px;line-height:1.45;color:var(--text)}
     .modalContent{display:grid;gap:12px}
+    .markdown{display:grid;gap:12px}
+    .markdown h1,.markdown h2,.markdown h3{margin:0}
+    .markdown h1{font-size:clamp(24px,4vw,34px);line-height:1.05;letter-spacing:-.05em}
+    .markdown h2{font-size:18px;line-height:1.1;letter-spacing:-.03em;margin-top:8px}
+    .markdown h3{font-size:14px;line-height:1.2;letter-spacing:.01em;margin-top:6px}
+    .markdown p,.markdown li,.markdown blockquote{font-size:14px;line-height:1.65;color:var(--text)}
+    .markdown p{margin:0}
+    .markdown ul,.markdown ol{margin:0;padding-left:20px;display:grid;gap:8px}
+    .markdown blockquote{margin:0;border-left:3px solid #f2f2f2;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:12px}
+    .markdown code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;background:#050505;border:1px solid var(--line);padding:2px 6px;border-radius:8px}
+    .markdown pre{margin:0;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;line-height:1.55;padding:12px;border-radius:14px;background:#050505;border:1px solid var(--line);overflow:auto;white-space:pre-wrap}
+    .markdown a{color:#f2f2f2;text-decoration:underline;text-underline-offset:2px}
+    .markdown hr{border:0;border-top:1px solid var(--line);margin:2px 0}
     .noteBlock{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.02);padding:14px 14px 13px}
     .noteBlock h3{margin:0 0 8px;font-size:14px;letter-spacing:.02em}
     .noteBlock p{margin:0 0 10px;color:var(--text);font-size:14px;line-height:1.6}
@@ -216,6 +229,200 @@
       .replaceAll("'", '&#39;');
   }
 
+  function inlineMd(text) {
+    let out = esc(text);
+    out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
+    out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+    out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    out = out.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+    return out;
+  }
+
+  function markdownToHtml(md) {
+    const lines = String(md || '').replace(/\r/g, '').split('\n');
+    const out = [];
+    let i = 0;
+    let inUl = false;
+    let inOl = false;
+    let inCode = false;
+    let codeBuf = [];
+    let paraBuf = [];
+
+    const flushPara = () => {
+      if (!paraBuf.length) return;
+      out.push(`<p>${inlineMd(paraBuf.join(' ').trim())}</p>`);
+      paraBuf = [];
+    };
+    const closeLists = () => {
+      if (inUl) { out.push('</ul>'); inUl = false; }
+      if (inOl) { out.push('</ol>'); inOl = false; }
+    };
+
+    while (i < lines.length) {
+      const line = lines[i];
+      if (inCode) {
+        if (line.trim().startsWith('```')) {
+          out.push(`<pre><code>${esc(codeBuf.join('\n'))}</code></pre>`);
+          codeBuf = [];
+          inCode = false;
+        } else {
+          codeBuf.push(line);
+        }
+        i += 1;
+        continue;
+      }
+
+      if (line.trim().startsWith('```')) {
+        flushPara();
+        closeLists();
+        inCode = true;
+        codeBuf = [];
+        i += 1;
+        continue;
+      }
+
+      if (!line.trim()) {
+        flushPara();
+        closeLists();
+        i += 1;
+        continue;
+      }
+
+      const h = line.match(/^(#{1,3})\s+(.*)$/);
+      if (h) {
+        flushPara();
+        closeLists();
+        const lvl = h[1].length;
+        out.push(`<h${lvl}>${inlineMd(h[2])}</h${lvl}>`);
+        i += 1;
+        continue;
+      }
+
+      const quote = line.match(/^>\s?(.*)$/);
+      if (quote) {
+        flushPara();
+        closeLists();
+        const qlines = [quote[1]];
+        i += 1;
+        while (i < lines.length && /^>\s?(.*)$/.test(lines[i])) {
+          qlines.push(lines[i].replace(/^>\s?/, ''));
+          i += 1;
+        }
+        out.push(`<blockquote>${qlines.map(l => inlineMd(l)).join('<br>')}</blockquote>`);
+        continue;
+      }
+
+      const bullet = line.match(/^[-*]\s+(.*)$/);
+      if (bullet) {
+        flushPara();
+        if (!inUl) { closeLists(); out.push('<ul>'); inUl = true; }
+        out.push(`<li>${inlineMd(bullet[1])}</li>`);
+        i += 1;
+        continue;
+      }
+
+      const ordered = line.match(/^\d+\.\s+(.*)$/);
+      if (ordered) {
+        flushPara();
+        if (!inOl) { closeLists(); out.push('<ol>'); inOl = true; }
+        out.push(`<li>${inlineMd(ordered[1])}</li>`);
+        i += 1;
+        continue;
+      }
+
+      if (line.trim() === '---') {
+        flushPara();
+        closeLists();
+        out.push('<hr>');
+        i += 1;
+        continue;
+      }
+
+      paraBuf.push(line.trim());
+      i += 1;
+    }
+
+    flushPara();
+    closeLists();
+    return out.join('\n');
+  }
+
+  function noteMarkdown(node) {
+    const isRoot = node.type === 'root';
+    const isSignature = node.type === 'signature';
+    const isPerson = node.type === 'person';
+    if (isRoot) {
+      return `# TanIA
+
+> Núcleo do cérebro e ponto de entrada do grafo.
+
+## O que você vê aqui
+
+- **Core**: arquivos centrais do cérebro
+- **Hermes**: skills e protocolos
+- **Claude**: configuração e referências
+- **silvIA** e **Jorge**: nós pessoais ligados ao núcleo
+
+## Como funciona
+
+Clique em qualquer nó para abrir a nota em *markdown*, igual a um preview de Obsidian.
+
+---
+
+## Dica rápida
+
+> O grafo fica mais legível quando você usa a busca para reduzir a malha.
+`;
+    }
+
+    if (isPerson) {
+      return `# ${node.label}
+
+> ${node.summary}
+
+## Propriedades
+
+- \`name\`: ${node.label}
+- \`role\`: ${node.role || node.label}
+- \`link\`: TanIA
+- \`view\`: obsidian-note
+
+## Nota
+
+Esse nó é um **apontamento pessoal** e abre como uma nota rápida, sem dashboard no caminho.
+`;
+    }
+
+    if (isSignature) {
+      return `# ${node.label}
+
+> Assinatura visual discreta da TanIA.
+
+## Papel
+
+- Mantém a identidade visual do grafo
+- Fica colado ao núcleo como marca secundária
+- Não compete com os nós de conteúdo
+`;
+    }
+
+    const related = nodes.filter(n => n.id !== node.id && linksRelated(node, n)).slice(0, 8).map(n => `- ${n.label}`).join('\n') || '- Sem ligações visíveis';
+    return `# ${node.label}
+
+> ${node.summary || 'Sem resumo disponível.'}
+
+## Propriedades
+
+- \`path\`: ${node.path || node.group || '-'}
+- \`group\`: ${node.group || '-'}
+- \`type\`: ${node.type}
+
+## Notas ligadas
+
+${related}
+`;
+  }
+
   function modalFor(node) {
     const isRoot = node.type === 'root';
     const isSignature = node.type === 'signature';
@@ -227,50 +434,7 @@
     meta.push({ k: 'Grupo', v: node.group || '-' });
     meta.push({ k: 'Ligação', v: isRoot ? 'Núcleo' : (node.path || node.summary || '-') });
     meta.push({ k: 'Estado', v: isSignature ? 'assinatura' : (isPerson ? 'pessoa' : 'nota') });
-
-    let body = '';
-    if (isRoot) {
-      body = `
-        <div class="noteBlock">
-          <h3>Visão geral</h3>
-          <p>TanIA é o núcleo do grafo. Clique num nó para abrir um painel de nota no estilo Obsidian, com leitura rápida e contexto direto.</p>
-          <div class="callout">Essa visualização funciona melhor em tela cheia: nós pequenos, foco rápido e detalhes no modal.</div>
-        </div>
-        <div class="noteBlock">
-          <h3>Conectado agora</h3>
-          <div class="chips">
-            <span class="chip">Core</span><span class="chip">Hermes</span><span class="chip">Claude</span><span class="chip">silvIA</span><span class="chip">Jorge</span>
-          </div>
-        </div>`;
-    } else if (isPerson) {
-      body = `
-        <div class="noteBlock">
-          <h3>${esc(node.label)}</h3>
-          <p>${esc(node.summary)}</p>
-          <div class="callout">Nota pessoal ligada ao núcleo TanIA. Esse nó abre como nota rápida, sem dashboard no caminho.</div>
-        </div>
-        <div class="noteBlock">
-          <h3>Propriedades</h3>
-          <div class="code">name: ${esc(node.label)}\nrole: ${esc(node.role || node.label)}\nlink: TanIA\nview: obsidian-note</div>
-        </div>`;
-    } else {
-      const links = nodes.filter(n => n.id !== node.id && linksRelated(node, n)).slice(0, 8);
-      body = `
-        <div class="noteBlock">
-          <h3>Resumo</h3>
-          <p>${esc(node.summary || 'Sem resumo disponível.')}</p>
-          <p class="muted">${esc(node.path || node.group || '')}</p>
-        </div>
-        <div class="noteBlock">
-          <h3>Propriedades</h3>
-          <div class="code">title: ${esc(node.label)}\npath: ${esc(node.path || node.group || '-') }\ngroup: ${esc(node.group || '-')}\ntype: ${esc(node.type)}</div>
-        </div>
-        <div class="noteBlock">
-          <h3>Notas ligadas</h3>
-          <div class="chips">${links.map(n => `<span class="chip">${esc(n.label)}</span>`).join('') || '<span class="chip">Sem ligações visíveis</span>'}</div>
-        </div>`;
-    }
-    return { crumb, title, meta, body };
+    return { crumb, title, meta, markdown: noteMarkdown(node) };
   }
 
   function linksRelated(source, target) {
@@ -282,7 +446,7 @@
     modalCrumb.textContent = panel.crumb;
     modalTitle.textContent = panel.title;
     modalMeta.innerHTML = panel.meta.map(m => `<div class="metaBox"><div class="k">${esc(m.k)}</div><div class="v">${esc(m.v)}</div></div>`).join('');
-    modalContent.innerHTML = panel.body;
+    modalContent.innerHTML = `<div class="markdown">${markdownToHtml(panel.markdown)}</div>`;
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
   }
