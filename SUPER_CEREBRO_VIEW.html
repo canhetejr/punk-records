@@ -33,7 +33,8 @@
     .tooltip.show{opacity:1;transform:translate(0,0)}
     .tooltip .t{font-weight:800;margin-bottom:4px}
     .tooltip .m{font-size:12px;color:var(--muted);line-height:1.4}
-    @media (max-width: 800px){html,body{overflow:hidden;height:100%;touch-action:none}.app{height:100dvh;min-height:100dvh;overflow:hidden}.graphWrap{position:absolute;inset:0;height:100dvh;min-height:100dvh}.hud{left:10px;right:10px;top:8px;max-width:none;gap:8px}.brand{max-width:none}h1{font-size:clamp(22px,7vw,30px)}.sub{display:none}.tools{flex-direction:column;align-items:stretch;gap:6px}.input,.select,.btn{width:100%;min-width:0;padding:10px 12px;border-radius:12px}.legend{display:none}.info{position:absolute;left:10px;right:10px;top:auto;bottom:10px;width:auto;margin:0;padding:10px 12px;border-radius:14px;max-height:18vh;overflow:auto}.info .k{font-size:11px;margin-bottom:5px}.info .v{font-size:12px;line-height:1.35}.info .s{font-size:11px;line-height:1.3}.status{display:none}.tooltip{display:none !important}}
+    .mobileDock{display:none}
+    @media (max-width: 800px){html,body{overflow:hidden;height:100%;touch-action:none}.app{height:100dvh;min-height:100dvh;overflow:hidden}.graphWrap{position:absolute;inset:0;height:100dvh;min-height:100dvh}.hud{display:none}.mobileDock{display:flex;position:absolute;left:10px;right:10px;bottom:10px;z-index:8;gap:8px;padding:8px;border:1px solid var(--line);border-radius:18px;background:rgba(9,9,10,.80);backdrop-filter:blur(14px);box-shadow:0 18px 60px rgba(0,0,0,.35);overflow:auto;scrollbar-width:none}.mobileDock::-webkit-scrollbar{display:none}.dockBtn{flex:0 0 auto;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);border-radius:999px;padding:10px 14px;font:700 12px/1.1 inherit;letter-spacing:.01em;white-space:nowrap}.dockBtn.active{background:#f2f2f2;color:#0a0a0a}.dockBtn.primary{background:#fff;color:#0a0a0a}.info{display:none}.status{display:none}.tooltip{display:none !important}}
   </style>
 </head>
 <body>
@@ -68,6 +69,15 @@
     <div class="k" id="infok">Visão geral</div>
     <div class="v" id="infov">Passe o mouse ou clique em um nó.</div>
     <div class="s" id="infos">Dica: a busca reduz a malha e destaca os nós conectados.</div>
+  </div>
+
+  <div class="mobileDock" id="mobileDock">
+    <button class="dockBtn primary" data-action="search">Buscar</button>
+    <button class="dockBtn" data-scope="all">Todas</button>
+    <button class="dockBtn" data-scope="core">Core</button>
+    <button class="dockBtn" data-scope="hermes">Hermes</button>
+    <button class="dockBtn" data-scope="claude">Claude</button>
+    <button class="dockBtn" data-action="reset">Reset</button>
   </div>
 
   <div class="tooltip" id="tip"><div class="t"></div><div class="m"></div></div>
@@ -123,6 +133,8 @@
   const infoV = document.getElementById('infov');
   const infoS = document.getElementById('infos');
   const status = document.getElementById('status');
+  const mobileDock = document.getElementById('mobileDock');
+  const dockButtons = [...document.querySelectorAll('.dockBtn')];
 
   let W = 0, H = 0, DPR = 1;
   let nodes = [], links = [];
@@ -208,6 +220,20 @@
 
     nodes = keep;
     status.textContent = `Nós carregados: ${nodes.length}`;
+    if (mobileDock) {
+      dockButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.scope === scopeVal));
+    }
+  }
+
+  function setScope(value) {
+    scope.value = value;
+    selectedId = null;
+    build();
+    if (TOUCH) {
+      infoK.textContent = value === 'all' ? 'Todas as camadas' : value.charAt(0).toUpperCase() + value.slice(1);
+      infoV.textContent = 'Filtro aplicado.';
+      infoS.textContent = 'Use o dock para alternar entre camadas.';
+    }
   }
 
   function applyPhysics() {
@@ -429,8 +455,7 @@
     infoS.textContent = 'A malha se reconfigura automaticamente.';
   });
   scope.addEventListener('change', () => {
-    selectedId = null;
-    build();
+    setScope(scope.value);
   });
   reset.addEventListener('click', () => {
     q.value = '';
@@ -438,11 +463,27 @@
     selectedId = null;
     hoveredId = null;
     pan = { x: 0, y: 0 };
-    zoom = 1;
+    zoom = TOUCH ? 0.76 : 1;
     build();
     infoK.textContent = 'Visão geral';
     infoV.textContent = 'Passe o mouse ou clique em um nó.';
     infoS.textContent = 'Dica: a busca reduz a malha e destaca os nós conectados.';
+  });
+  dockButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      const nextScope = btn.dataset.scope;
+      if (action === 'search') {
+        q.focus();
+        q.select?.();
+        return;
+      }
+      if (action === 'reset') {
+        reset.click();
+        return;
+      }
+      if (nextScope) setScope(nextScope);
+    });
   });
 
   window.addEventListener('resize', resize);
