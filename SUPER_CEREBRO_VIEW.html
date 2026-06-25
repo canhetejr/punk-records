@@ -147,6 +147,7 @@
       { id: 'core', label: 'Core', group: 'core', summary: 'Arquivos centrais do AI Brain.' },
       { id: 'hermes', label: 'Hermes', group: 'hermes', summary: 'Skills e protocolos Hermes.' },
       { id: 'claude', label: 'Claude', group: 'claude', summary: 'Configurações e referências do Claude.' },
+      { id: 'skills', label: 'Skills', group: 'skills', summary: 'Catálogo completo das skills disponíveis.' },
     ],
     items: {
       core: [
@@ -173,7 +174,27 @@
         { id: 'settings', label: 'settings.json', path: '~/.claude/settings.json', summary: 'Configuração local do Claude.' },
         { id: 'auth', label: 'Claude Auth', path: 'claude auth status', summary: 'Estado de autenticação do Claude CLI.' },
       ],
+      skills: [],
     }
+  };
+
+  const SKILLS = {
+    general: ['computer-use', 'dogfood', 'yuanbao'],
+    'autonomous-ai-agents': ['antigravity', 'antigravity-output-contract', 'antigravity-quickstart', 'claude-antigravity-token-efficiency', 'hermes-agent', 'kanban-codex-lane', 'super-cerebro-bridge'],
+    creative: ['baoyu-article-illustrator', 'baoyu-comic', 'baoyu-infographic', 'comfyui', 'generative-visual-media', 'humanizer', 'ideation', 'pixel-art', 'popular-web-designs', 'songwriting-and-ai-music', 'touchdesigner-mcp', 'visual-artifact-studio'],
+    'data-science': ['jupyter-live-kernel'],
+    devops: ['api-integration-smoke-test', 'coolify-controller', 'coolify-vps-deployment', 'docker-compose-self-hosted-apps', 'hermes-control-surfaces', 'traefik-static-site-publish', 'webhook-subscriptions'],
+    gaming: ['minecraft-modpack-server', 'pokemon-player'],
+    github: ['codebase-inspection', 'github-workflow'],
+    mcp: ['native-mcp'],
+    media: ['gif-search', 'heartmula', 'songsee', 'spotify', 'youtube-content'],
+    mlops: ['audiocraft-audio-generation', 'dspy', 'evaluating-llms-harness', 'huggingface-hub', 'llama-cpp', 'obliteratus', 'segment-anything-model', 'serving-llms-vllm', 'weights-and-biases'],
+    productivity: ['knowledge-work-automation', 'maps', 'nano-pdf', 'notion', 'personal-device-automation', 'petdex'],
+    'red-teaming': ['godmode'],
+    research: ['arxiv', 'blogwatcher', 'event-info-verification', 'llm-wiki', 'polymarket', 'research-paper-writing'],
+    'smart-home': ['openhue'],
+    'social-media': ['xurl'],
+    'software-development': ['coding-agent-workflows', 'node-inspect-debugger', 'plan', 'python-debugpy', 'requesting-code-review', 'simplify-code', 'spike', 'systematic-debugging', 'test-driven-development', 'unknown-tool-learning-loop', 'writing-plans'],
   };
 
   const canvas = document.getElementById('c');
@@ -362,6 +383,7 @@
 - **Core**: arquivos centrais do cérebro
 - **Hermes**: skills e protocolos
 - **Claude**: configuração e referências
+- **Skills**: catálogo completo das skills disponíveis
 - **silvIA** e **Jorge**: nós pessoais ligados ao núcleo
 - **Luiz**: nó pessoal com o histórico das solicitações
 
@@ -430,6 +452,15 @@ Esse nó é um **apontamento pessoal** e abre como uma nota rápida, sem dashboa
 `;
     }
 
+    if (node.type === 'group' && node.group === 'skills') {
+      const total = Object.values(SKILLS).reduce((sum, list) => sum + list.length, 0);
+      const sections = Object.entries(SKILLS).map(([category, names]) => {
+        const pretty = category.replace(/-/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase());
+        return `## ${pretty}\n\n${names.map(name => `- ${name}`).join('\n')}`;
+      }).join('\n\n');
+      return `# Skills\n\n> Catálogo completo das skills disponíveis (${total} no total).\n\n${sections}\n`;
+    }
+
     if (isSignature) {
       return `# ${node.label}
 
@@ -443,7 +474,6 @@ Esse nó é um **apontamento pessoal** e abre como uma nota rápida, sem dashboa
 `;
     }
 
-    const related = nodes.filter(n => n.id !== node.id && linksRelated(node, n)).slice(0, 8).map(n => `- ${n.label}`).join('\n') || '- Sem ligações visíveis';
     return `# ${node.label}
 
 > ${node.summary || 'Sem resumo disponível.'}
