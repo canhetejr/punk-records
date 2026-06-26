@@ -86,6 +86,7 @@
         <option value="core">Core</option>
         <option value="hermes">Hermes</option>
         <option value="claude">Claude</option>
+        <option value="skills">Skills</option>
       </select>
       <button id="reset" class="btn">Reset</button>
     </div>
@@ -112,6 +113,7 @@
     <button class="dockBtn" data-scope="core">Core</button>
     <button class="dockBtn" data-scope="hermes">Hermes</button>
     <button class="dockBtn" data-scope="claude">Claude</button>
+    <button class="dockBtn" data-scope="skills">Skills</button>
     <button class="dockBtn" data-action="reset">Reset</button>
   </div>
 
@@ -154,9 +156,9 @@
         { id: 'readme', label: 'README.md', path: '~/.ai-brain/README.md', summary: 'Índice do diretório local do cérebro.' },
         { id: 'index', label: 'INDEX.md', path: '~/.ai-brain/INDEX.md', summary: 'Mapa principal do conteúdo indexado.' },
         { id: 'config', label: 'brain_config.yaml', path: '~/.ai-brain/brain_config.yaml', summary: 'Configurações e identidade do cérebro.' },
-        { id: 'super', label: 'SUPER_CEREBRO.md', path: '~/.ai-brain/SUPER_CEREBRO.md', summary: 'Documento central do cérebro local.' },
+        { id: 'super', label: 'PUNK_RECORDS.md', path: '~/.ai-brain/PUNK_RECORDS.md', summary: 'Documento central do cérebro local.' },
         { id: 'cleanup', label: 'CLEANUP_REPORT.md', path: '~/.ai-brain/CLEANUP_REPORT.md', summary: 'Relatório de limpeza e reorganização.' },
-        { id: 'details', label: 'SUPER_CEREBRO_DETALHES.md', path: '~/.ai-brain/SUPER_CEREBRO_DETALHES.md', summary: 'Saída detalhada do cérebro local.' },
+        { id: 'details', label: 'PUNK_RECORDS_DETAILS.md', path: '~/.ai-brain/PUNK_RECORDS_DETAILS.md', summary: 'Saída detalhada do cérebro local.' },
       ],
       hermes: [
         { id: 'agent', label: 'Hermes Agent', path: '~/.hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md', summary: 'Skill base para operar Hermes.' },
@@ -196,6 +198,14 @@
     'social-media': ['xurl'],
     'software-development': ['coding-agent-workflows', 'node-inspect-debugger', 'plan', 'python-debugpy', 'requesting-code-review', 'simplify-code', 'spike', 'systematic-debugging', 'test-driven-development', 'unknown-tool-learning-loop', 'writing-plans'],
   };
+
+  DATA.items.skills = Object.entries(SKILLS).map(([category, names]) => ({
+    id: category,
+    label: category.replace(/-/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase()),
+    path: `skills://${category}`,
+    summary: `${names.length} skills`,
+    skills: names,
+  }));
 
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
@@ -461,17 +471,14 @@ Esse nó é um **apontamento pessoal** e abre como uma nota rápida, sem dashboa
       return `# Skills\n\n> Catálogo completo das skills disponíveis (${total} no total).\n\n${sections}\n`;
     }
 
+    if (node.group === 'skills' && Array.isArray(node.skills)) {
+      const total = node.skills.length;
+      const items = node.skills.map(name => `- ${name}`).join('\n');
+      return `# ${node.label}\n\n> Categoria de skills com ${total} itens.\n\n## Skills\n\n${items}\n`;
+    }
+
     if (isSignature) {
-      return `# ${node.label}
-
-> Assinatura visual discreta da TanIA.
-
-## Papel
-
-- Mantém a identidade visual do grafo
-- Fica colado ao núcleo como marca secundária
-- Não compete com os nós de conteúdo
-`;
+      return `# ${node.label}\n\n> Assinatura visual discreta da TanIA.\n\n## Papel\n\n- Mantém a identidade visual do grafo\n- Fica colado ao núcleo como marca secundária\n- Não compete com os nós de conteúdo\n`;
     }
 
     return `# ${node.label}
